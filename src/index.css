@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+/*
+ * Theme tokens go here in Phase 1.
+ * Plan: define semantic CSS variables (--color-bg, --color-text, --color-accent...)
+ * under [data-theme='kawaii'] and [data-theme='aventura'], then map them with @theme.
+ */
