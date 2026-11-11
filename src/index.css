@@ -1,7 +1,98 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/nunito';
+@import '@fontsource-variable/cinzel';
 
 /*
- * Theme tokens go here in Phase 1.
- * Plan: define semantic CSS variables (--color-bg, --color-text, --color-accent...)
- * under [data-theme='kawaii'] and [data-theme='aventura'], then map them with @theme.
+ * Theme tokens.
+ * Components never use raw colors: they use semantic utilities (bg-surface, text-fg, ...).
+ * Each theme only changes the values of the --t-* variables below.
+ * The keys of this file must match THEMES in src/features/theme/themes.ts.
  */
+
+:root,
+[data-theme='kawaii'] {
+  --t-bg: #fff5f8;
+  --t-surface: #ffffff;
+  --t-fg: #3d2b33;
+  --t-fg-muted: #6b4f5b;
+  --t-accent: #c2185b;
+  --t-accent-fg: #ffffff;
+  --t-accent-soft: #fde4ee;
+  --t-border: #f3c4d6;
+  --t-focus: #7b1fa2;
+
+  --t-font-body: 'Nunito Variable', system-ui, sans-serif;
+  --t-font-display: 'Nunito Variable', system-ui, sans-serif;
+  --t-radius: 1.25rem;
+
+  color-scheme: light;
+}
+
+[data-theme='aventura'] {
+  --t-bg: #0f2418;
+  --t-surface: #183a27;
+  --t-fg: #f3ebd3;
+  --t-fg-muted: #c9bf9f;
+  --t-accent: #d4af37;
+  --t-accent-fg: #0f2418;
+  --t-accent-soft: #24492f;
+  --t-border: #2f5a3f;
+  --t-focus: #ffd966;
+
+  --t-font-body: 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --t-font-display: 'Cinzel Variable', Georgia, serif;
+  --t-radius: 0.25rem;
+
+  color-scheme: dark;
+}
+
+/*
+ * `inline` makes Tailwind emit var(--t-*) in each utility instead of copying the value,
+ * so utilities follow the active theme at runtime.
+ */
+@theme inline {
+  --color-bg: var(--t-bg);
+  --color-surface: var(--t-surface);
+  --color-fg: var(--t-fg);
+  --color-fg-muted: var(--t-fg-muted);
+  --color-accent: var(--t-accent);
+  --color-accent-fg: var(--t-accent-fg);
+  --color-accent-soft: var(--t-accent-soft);
+  --color-border: var(--t-border);
+  --color-focus: var(--t-focus);
+
+  --font-body: var(--t-font-body);
+  --font-display: var(--t-font-display);
+
+  --radius-theme: var(--t-radius);
+}
+
+@layer base {
+  html {
+    @apply bg-bg font-body text-fg antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+
+  /* One visible focus style for the whole app (WCAG 2.4.7 / 2.4.11). */
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-focus;
+  }
+
+  /* Smooth theme change, only for people who did not ask for reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    body,
+    header,
+    nav a,
+    button {
+      transition:
+        background-color 200ms ease,
+        color 200ms ease,
+        border-color 200ms ease;
+    }
+  }
+}
