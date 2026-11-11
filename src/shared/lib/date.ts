@@ -77,6 +77,21 @@ export function addDays(date: ISODate, amount: number): ISODate {
   return toISODate(result.getUTCFullYear(), result.getUTCMonth() + 1, result.getUTCDate())
 }
 
+/** Same day in another month, clamped to the last day (Jan 31 + 1 month = Feb 28). */
+export function addMonths(date: ISODate, amount: number): ISODate {
+  const { year, month, day } = getDateParts(date)
+  const monthIndex = year * 12 + (month - 1) + amount
+  const targetYear = Math.floor(monthIndex / 12)
+  const targetMonth = (monthIndex % 12) + 1
+  return toISODate(targetYear, targetMonth, Math.min(day, daysInMonth(targetYear, targetMonth)))
+}
+
+/** 0 = Monday ... 6 = Sunday. Mexico (and ISO 8601) start the week on Monday. */
+export function mondayBasedWeekday(date: ISODate): number {
+  const { year, month, day } = getDateParts(date)
+  return (weekdayOf(year, month, day) + 6) % 7
+}
+
 /** Today in the device's local time zone. */
 export function todayISODate(now: Date = new Date()): ISODate {
   return toISODate(now.getFullYear(), now.getMonth() + 1, now.getDate())

@@ -1,17 +1,32 @@
-import { getDateParts, todayISODate } from '../../shared/lib/date'
+import { todayISODate } from '../../shared/lib/date'
 import { Page } from '../../shared/ui/Page'
 import { FAMILY_SPECIAL_DAYS } from '../special-days/family'
 import { MEXICAN_SPECIAL_DAYS } from '../special-days/mexico'
-import { SpecialDaysList } from '../special-days/SpecialDaysList'
+import { SpecialDayFilters } from '../special-days/SpecialDayFilters'
+import { useSpecialDayPreferences } from '../special-days/useSpecialDayPreferences'
+import { MonthCalendar } from './MonthCalendar'
 
 const ALL_SPECIAL_DAYS = [...FAMILY_SPECIAL_DAYS, ...MEXICAN_SPECIAL_DAYS]
 
 export function CalendarPage() {
-  const { year, month } = getDateParts(todayISODate())
+  const { preferences, toggleCategory, hideDay, showDay } = useSpecialDayPreferences()
 
   return (
     <Page title="Calendario">
-      <SpecialDaysList days={ALL_SPECIAL_DAYS} initialYear={year} initialMonth={month} />
+      <div className="space-y-4">
+        <MonthCalendar
+          specialDays={ALL_SPECIAL_DAYS}
+          preferences={preferences}
+          today={todayISODate()}
+          onHideDay={hideDay}
+        />
+        <SpecialDayFilters
+          specialDays={ALL_SPECIAL_DAYS}
+          preferences={preferences}
+          onToggleCategory={toggleCategory}
+          onShowDay={showDay}
+        />
+      </div>
     </Page>
   )
 }

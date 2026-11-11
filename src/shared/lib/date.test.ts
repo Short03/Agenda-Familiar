@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   addDays,
+  addMonths,
   daysInMonth,
   getDateParts,
   isLeapYear,
+  mondayBasedWeekday,
   parseISODate,
   toISODate,
   todayISODate,
@@ -62,6 +64,26 @@ describe('calendar math', () => {
 
   it('splits a date into parts', () => {
     expect(getDateParts(toISODate(2027, 10, 9))).toEqual({ year: 2027, month: 10, day: 9 })
+  })
+})
+
+describe('addMonths', () => {
+  it('moves to the same day in another month', () => {
+    expect(addMonths(toISODate(2026, 11, 16), 1)).toBe('2026-12-16')
+    expect(addMonths(toISODate(2026, 12, 16), 1)).toBe('2027-01-16')
+    expect(addMonths(toISODate(2027, 1, 16), -1)).toBe('2026-12-16')
+  })
+
+  it('clamps to the last day of shorter months', () => {
+    expect(addMonths(toISODate(2027, 1, 31), 1)).toBe('2027-02-28')
+    expect(addMonths(toISODate(2028, 3, 31), -1)).toBe('2028-02-29')
+  })
+})
+
+describe('mondayBasedWeekday', () => {
+  it('starts the week on Monday', () => {
+    expect(mondayBasedWeekday(toISODate(2026, 11, 16))).toBe(0) // Monday
+    expect(mondayBasedWeekday(toISODate(2026, 11, 22))).toBe(6) // Sunday
   })
 })
 

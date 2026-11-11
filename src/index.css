@@ -21,6 +21,13 @@
   --t-border: #f3c4d6;
   --t-focus: #7b1fa2;
 
+  /* Special day categories (markers need 3:1 against surface, WCAG 1.4.11) */
+  --t-cat-oficial: #c62828;
+  --t-cat-civica: #2e7d32;
+  --t-cat-tradicion: #b45309;
+  --t-cat-familia: var(--t-accent);
+  --t-cat-personal: #1565c0;
+
   --t-font-body: 'Nunito Variable', system-ui, sans-serif;
   --t-font-display: 'Nunito Variable', system-ui, sans-serif;
   --t-radius: 1.25rem;
@@ -38,6 +45,12 @@
   --t-accent-soft: #24492f;
   --t-border: #2f5a3f;
   --t-focus: #ffd966;
+
+  --t-cat-oficial: #ff8a80;
+  --t-cat-civica: #8fd9a8;
+  --t-cat-tradicion: #ffb74d;
+  --t-cat-familia: var(--t-accent);
+  --t-cat-personal: #90caf9;
 
   --t-font-body: 'Iowan Old Style', Georgia, 'Times New Roman', serif;
   --t-font-display: 'Cinzel Variable', Georgia, serif;
@@ -60,6 +73,11 @@
   --color-accent-soft: var(--t-accent-soft);
   --color-border: var(--t-border);
   --color-focus: var(--t-focus);
+  --color-cat-oficial: var(--t-cat-oficial);
+  --color-cat-civica: var(--t-cat-civica);
+  --color-cat-tradicion: var(--t-cat-tradicion);
+  --color-cat-familia: var(--t-cat-familia);
+  --color-cat-personal: var(--t-cat-personal);
 
   --font-body: var(--t-font-body);
   --font-display: var(--t-font-display);
