@@ -2,16 +2,16 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { ThemeProvider } from '../features/theme/ThemeProvider'
+import { AppProviders } from './AppProviders'
 import { axe } from '../test/axe'
 import { routes } from './routes'
 
 function renderApp(initialPath = '/') {
   const router = createMemoryRouter(routes, { initialEntries: [initialPath] })
   const view = render(
-    <ThemeProvider>
+    <AppProviders>
       <RouterProvider router={router} />
-    </ThemeProvider>,
+    </AppProviders>,
   )
   return { ...view, router }
 }
