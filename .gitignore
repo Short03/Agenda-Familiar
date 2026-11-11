@@ -27,3 +27,6 @@ coverage
 .env
 .env.*
 !.env.example
+
+# Private family data (never commit)
+*.local.ts
