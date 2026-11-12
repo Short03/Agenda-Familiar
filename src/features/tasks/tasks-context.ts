@@ -2,12 +2,13 @@ import { createContext, useContext } from 'react'
 import type { NewTaskInput, Task } from './task-model'
 
 export interface TasksContextValue {
-  /** Tasks that are not deleted. */
+  /** Tasks that are not deleted. Empty while loading. */
   tasks: readonly Task[]
-  addTask: (input: NewTaskInput) => Task
-  setDone: (id: string, done: boolean) => void
-  deleteTask: (id: string) => void
-  restoreTask: (id: string) => void
+  isLoading: boolean
+  addTask: (input: NewTaskInput) => Promise<Task>
+  setDone: (id: string, done: boolean) => Promise<void>
+  deleteTask: (id: string) => Promise<void>
+  restoreTask: (id: string) => Promise<void>
 }
 
 export const TasksContext = createContext<TasksContextValue | null>(null)

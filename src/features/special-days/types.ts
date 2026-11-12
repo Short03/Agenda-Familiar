@@ -44,6 +44,22 @@ export interface SpecialDay {
   sinceYear?: number
 }
 
+/** Categories people can create themselves; the rest come from the built-in catalog. */
+export const CUSTOM_DAY_CATEGORIES = ['familia', 'personal'] as const
+export type CustomDayCategory = (typeof CUSTOM_DAY_CATEGORIES)[number]
+
+/**
+ * A special day entered in the app (birthdays, anniversaries) and stored in IndexedDB.
+ * Same sync-ready fields as tasks (ADR 0001).
+ */
+export interface CustomSpecialDay extends SpecialDay {
+  category: CustomDayCategory
+  rule: { kind: 'fixed'; month: number; day: number }
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+}
+
 /** One special day placed on a concrete date. */
 export interface SpecialDayOccurrence {
   date: ISODate

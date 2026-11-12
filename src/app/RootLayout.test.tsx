@@ -66,6 +66,16 @@ describe('RootLayout', () => {
     expect(document.getElementById('main')).toBeInTheDocument()
   })
 
+  it('links to the settings page and marks it as current', async () => {
+    const user = userEvent.setup()
+    renderApp('/calendario')
+
+    await user.click(await screen.findByRole('link', { name: 'Ajustes' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Ajustes' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
+  })
+
   it('shows a not-found page for unknown routes', async () => {
     renderApp('/no-existe')
 

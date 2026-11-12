@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus } from 'lucide-react'
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { getQuadrant, QUADRANT_META } from './task-model'
 import {
@@ -13,7 +13,8 @@ import {
 } from './task-form-schema'
 
 interface TaskFormProps {
-  onSubmit: (values: TaskFormOutput) => void
+  /** Resolve to true when the task was saved. On false the form keeps what was typed. */
+  onSubmit: (values: TaskFormOutput) => boolean | Promise<boolean>
 }
 
 const inputClass =
@@ -37,28 +38,31 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
     handleSubmit,
     reset,
     control,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors },
   } = useForm<TaskFormInput, unknown, TaskFormOutput>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: EMPTY_TASK_FORM,
   })
 
-  // RHF recommends resetting after a successful submit in an effect, once the form
-  // state has settled, instead of inside the submit handler.
+  // Reset in an effect after a save (as RHF recommends), not inside the submit handler.
+  // `savedCount` only grows when the parent confirms the task was stored.
+  const [savedCount, setSavedCount] = useState(0)
   const titleRef = useRef<HTMLInputElement | null>(null)
   const { ref: registerTitleRef, ...titleField } = register('title')
 
   useEffect(() => {
-    if (!isSubmitSuccessful) return
+    if (savedCount === 0) return
     reset()
     titleRef.current?.focus() // ready for the next task
-  }, [isSubmitSuccessful, reset])
+  }, [savedCount, reset])
 
   // Live preview of the Eisenhower quadrant, so the two checkboxes make sense.
   const [important = false, urgent = false] = useWatch({ control, name: ['important', 'urgent'] })
   const quadrant = QUADRANT_META[getQuadrant({ important, urgent })]
 
-  const submit = handleSubmit(onSubmit)
+  const submit = handleSubmit(async (values) => {
+    if (await onSubmit(values)) setSavedCount((count) => count + 1)
+  })
 
   return (
     <form

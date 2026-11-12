@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, SquareCheckBig } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import {
   addDays,
@@ -11,6 +11,7 @@ import {
 import { CategoryMarker } from '../special-days/CategoryMarker'
 import { getSpecialDaysInRange, groupByDate } from '../special-days/occurrences'
 import type { SpecialDay, SpecialDayPreferences } from '../special-days/types'
+import { isDone, type Task } from '../tasks/task-model'
 import { DayDetails } from './DayDetails'
 import { buildMonthGrid, getMonthGridRange } from './month-grid'
 
@@ -46,11 +47,37 @@ const KEY_MOVES: Record<string, (date: ISODate) => ISODate> = {
 interface MonthCalendarProps {
   specialDays: readonly SpecialDay[]
   preferences: SpecialDayPreferences
+  tasks: readonly Task[]
   today: ISODate
   onHideDay: (id: string) => void
+  onToggleTask: (task: Task) => void
+  onAddTask: (date: ISODate, title: string) => Promise<boolean>
 }
 
-export function MonthCalendar({ specialDays, preferences, today, onHideDay }: MonthCalendarProps) {
+/** Tasks with a due date, grouped by that date. */
+function groupTasksByDate(tasks: readonly Task[]): Map<ISODate, Task[]> {
+  const map = new Map<ISODate, Task[]>()
+  for (const task of tasks) {
+    if (!task.dueDate) continue
+    const list = map.get(task.dueDate)
+    if (list) list.push(task)
+    else map.set(task.dueDate, [task])
+  }
+  return map
+}
+
+const pendingLabel = (count: number) =>
+  count === 1 ? '1 tarea pendiente' : `${count} tareas pendientes`
+
+export function MonthCalendar({
+  specialDays,
+  preferences,
+  tasks,
+  today,
+  onHideDay,
+  onToggleTask,
+  onAddTask,
+}: MonthCalendarProps) {
   // Single source of truth: the visible month is derived from the selected day.
   const [selected, setSelected] = useState<ISODate>(today)
   const { year, month } = getDateParts(selected)
@@ -60,6 +87,7 @@ export function MonthCalendar({ specialDays, preferences, today, onHideDay }: Mo
     const { start, end } = getMonthGridRange(year, month)
     return groupByDate(getSpecialDaysInRange(specialDays, start, end, preferences))
   }, [specialDays, preferences, year, month])
+  const tasksByDate = useMemo(() => groupTasksByDate(tasks), [tasks])
 
   // Roving tabindex: only the selected day is in the Tab order. After a keyboard move,
   // focus follows the selection (but not after clicking "next month").
@@ -154,10 +182,14 @@ export function MonthCalendar({ specialDays, preferences, today, onHideDay }: Mo
                   const isSelected = date === selected
                   const occurrences = occurrencesByDate.get(date) ?? []
                   const names = occurrences.map((o) => o.specialDay.name)
+                  const pendingCount = (tasksByDate.get(date) ?? []).filter(
+                    (t) => !isDone(t),
+                  ).length
                   const label = [
                     cellLabelFormatter.format(toLocalDate(date)),
                     isToday ? 'hoy' : null,
                     ...names,
+                    pendingCount > 0 ? pendingLabel(pendingCount) : null,
                   ]
                     .filter(Boolean)
                     .join(', ')
@@ -197,6 +229,12 @@ export function MonthCalendar({ specialDays, preferences, today, onHideDay }: Mo
                           {occurrences.length > MAX_MARKERS && (
                             <span className="text-[0.625rem] leading-none font-bold">+</span>
                           )}
+                          {pendingCount > 0 && (
+                            <span className="inline-flex items-center text-[0.625rem] leading-none font-bold text-accent">
+                              <SquareCheckBig className="size-3" />
+                              {pendingCount > 1 && pendingCount}
+                            </span>
+                          )}
                         </span>
                       </button>
                     </td>
@@ -208,7 +246,14 @@ export function MonthCalendar({ specialDays, preferences, today, onHideDay }: Mo
         </table>
       </div>
 
-      <DayDetails date={selected} occurrences={selectedOccurrences} onHideDay={onHideDay} />
+      <DayDetails
+        date={selected}
+        occurrences={selectedOccurrences}
+        tasks={tasksByDate.get(selected) ?? []}
+        onHideDay={onHideDay}
+        onToggleTask={onToggleTask}
+        onAddTask={onAddTask}
+      />
     </div>
   )
 }

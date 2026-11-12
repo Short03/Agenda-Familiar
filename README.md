@@ -4,12 +4,14 @@ A personal calendar and task manager for the family, with two switchable themes
 ("Kawaii" and "Aventura"). Built as a hands-on learning project for React, TypeScript,
 testing and accessibility.
 
-## Features (planned)
+## Features
 
 - **Calendar:** monthly view (Monday to Sunday), Mexican holidays and commemorative dates,
   family birthdays, toggles per category and per date, tasks with reminders on any day.
 - **Tasks:** add/remove, to-do vs. done, Eisenhower priority (important × urgent), tags.
 - **Themes:** one button (top left) switches the whole app between themes.
+- **Settings:** family and personal dates, JSON backup (share sheet on iPhone), storage protection.
+- **Storage:** everything is saved on the device in IndexedDB (Dexie).
 - **PWA:** installable on a phone and usable offline.
 
 ## Stack

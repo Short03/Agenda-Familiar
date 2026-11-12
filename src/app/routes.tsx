@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router'
 import { CalendarPage } from '../features/calendar/CalendarPage'
+import { SettingsPage } from '../features/settings/SettingsPage'
 import { TasksPage } from '../features/tasks/TasksPage'
 import { NotFoundPage } from './NotFoundPage'
 import { RootLayout } from './RootLayout'
@@ -13,6 +14,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <Navigate to="/calendario" replace /> },
       { path: 'calendario', element: <CalendarPage /> },
       { path: 'tareas', element: <TasksPage /> },
+      { path: 'ajustes', element: <SettingsPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

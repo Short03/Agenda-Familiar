@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { toISODate } from '../../shared/lib/date'
+import { toISODate, type ISODate } from '../../shared/lib/date'
+import { createTask, type Task } from '../tasks/task-model'
 import { axe } from '../../test/axe'
 import { MEXICAN_SPECIAL_DAYS } from '../special-days/mexico'
 import { DEFAULT_PREFERENCES, type SpecialDayPreferences } from '../special-days/types'
@@ -9,18 +10,28 @@ import { MonthCalendar } from './MonthCalendar'
 
 const TODAY = toISODate(2026, 11, 11) // Wednesday
 
-function renderCalendar(preferences: SpecialDayPreferences = DEFAULT_PREFERENCES) {
+function renderCalendar(
+  preferences: SpecialDayPreferences = DEFAULT_PREFERENCES,
+  tasks: readonly Task[] = [],
+) {
   const onHideDay = vi.fn<(id: string) => void>()
+  const onToggleTask = vi.fn<(task: Task) => void>()
+  const onAddTask = vi
+    .fn<(date: ISODate, title: string) => Promise<boolean>>()
+    .mockResolvedValue(true)
   const user = userEvent.setup()
   const view = render(
     <MonthCalendar
       specialDays={MEXICAN_SPECIAL_DAYS}
       preferences={preferences}
+      tasks={tasks}
       today={TODAY}
       onHideDay={onHideDay}
+      onToggleTask={onToggleTask}
+      onAddTask={onAddTask}
     />,
   )
-  return { user, onHideDay, container: view.container }
+  return { user, onHideDay, onToggleTask, onAddTask, container: view.container }
 }
 
 const monthHeading = () => screen.getByRole('heading', { level: 2 })
@@ -146,5 +157,76 @@ describe('MonthCalendar', () => {
     const { container } = renderCalendar()
 
     expect(await axe(container)).toHaveNoViolations()
+  })
+  describe('tasks', () => {
+    const bakeCake = createTask(
+      {
+        title: 'Hornear pastel',
+        notes: '',
+        important: true,
+        urgent: true,
+        dueDate: toISODate(2026, 11, 20),
+      },
+      't1',
+      '2026-11-11T10:00:00.000Z',
+    )
+    const buyCandles = createTask(
+      {
+        title: 'Comprar velas',
+        notes: '',
+        important: false,
+        urgent: false,
+        dueDate: toISODate(2026, 11, 20),
+      },
+      't2',
+      '2026-11-11T10:00:00.000Z',
+    )
+
+    it('announces pending tasks in the day name and lists them in the details', async () => {
+      const { user } = renderCalendar(DEFAULT_PREFERENCES, [bakeCake, buyCandles])
+
+      expect(dayButton('2026-11-20')).toHaveAccessibleName(
+        expect.stringContaining('2 tareas pendientes'),
+      )
+
+      await user.click(dayButton('2026-11-20')!)
+      const details = screen.getByRole('region', { name: /20 de noviembre/i })
+      expect(within(details).getByRole('checkbox', { name: /Hornear pastel/ })).not.toBeChecked()
+      expect(within(details).getByText('Hacer ya')).toBeInTheDocument()
+    })
+
+    it('toggles a task from the day details', async () => {
+      const { user, onToggleTask } = renderCalendar(DEFAULT_PREFERENCES, [bakeCake])
+      await user.click(dayButton('2026-11-20')!)
+
+      await user.click(screen.getByRole('checkbox', { name: /Hornear pastel/ }))
+
+      expect(onToggleTask).toHaveBeenCalledWith(bakeCake)
+    })
+
+    it('adds a task for the selected day', async () => {
+      const { user, onAddTask } = renderCalendar()
+      await user.click(dayButton('2026-11-20')!)
+
+      await user.type(
+        screen.getByRole('textbox', { name: 'Nueva tarea para este día' }),
+        '  Inflar globos ',
+      )
+      await user.click(screen.getByRole('button', { name: 'Agregar tarea a este día' }))
+
+      expect(onAddTask).toHaveBeenCalledWith('2026-11-20', 'Inflar globos')
+      expect(screen.getByRole('textbox', { name: 'Nueva tarea para este día' })).toHaveValue('')
+    })
+
+    it('does not add an empty task', async () => {
+      const { user, onAddTask } = renderCalendar()
+
+      await user.click(screen.getByRole('button', { name: 'Agregar tarea a este día' }))
+
+      expect(onAddTask).not.toHaveBeenCalled()
+      expect(
+        screen.getByRole('textbox', { name: 'Nueva tarea para este día' }),
+      ).toHaveAccessibleDescription('Escribe qué hay que hacer.')
+    })
   })
 })

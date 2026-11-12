@@ -1,4 +1,4 @@
-import { CalendarDays, ListChecks } from 'lucide-react'
+import { CalendarDays, ListChecks, Settings } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { ThemeToggle } from '../features/theme/ThemeToggle'
@@ -42,7 +42,21 @@ export function RootLayout() {
       <header className="border-b-2 border-border bg-surface pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
           <ThemeToggle />
-          <p className="font-display text-lg font-bold text-accent">Agenda familiar</p>
+          <p className="min-w-0 flex-1 truncate font-display text-lg font-bold text-accent">
+            Agenda familiar
+          </p>
+          <NavLink
+            to="/ajustes"
+            aria-label="Ajustes"
+            className={({ isActive }) =>
+              [
+                'inline-flex size-11 shrink-0 items-center justify-center rounded-theme hover:bg-accent-soft',
+                isActive ? 'bg-accent-soft text-accent' : 'text-fg-muted',
+              ].join(' ')
+            }
+          >
+            <Settings aria-hidden="true" className="size-6" />
+          </NavLink>
         </div>
 
         <nav aria-label="Secciones" className="mx-auto max-w-5xl px-4">
