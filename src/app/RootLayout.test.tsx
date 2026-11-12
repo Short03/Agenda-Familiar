@@ -40,7 +40,7 @@ describe('RootLayout', () => {
     const user = userEvent.setup()
     renderApp('/calendario')
 
-    await user.click(screen.getByRole('link', { name: 'Tareas' }))
+    await user.click(await screen.findByRole('link', { name: 'Tareas' }))
 
     const heading = await screen.findByRole('heading', { level: 1, name: 'Tareas' })
     await waitFor(() => expect(heading).toHaveFocus())

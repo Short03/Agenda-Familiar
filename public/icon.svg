@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Original app icon: a calendar with a heart. Source for every generated PNG. -->
+  <rect width="512" height="512" rx="112" fill="#c2185b"/>
+  <rect x="104" y="136" width="304" height="264" rx="44" fill="#fff5f8"/>
+  <path d="M104 180a44 44 0 0 1 44-44h216a44 44 0 0 1 44 44v36H104z" fill="#fde4ee"/>
+  <rect x="172" y="100" width="32" height="76" rx="16" fill="#fde4ee"/>
+  <rect x="308" y="100" width="32" height="76" rx="16" fill="#fde4ee"/>
+  <path d="M256 368c-10 0-80-46-80-98 0-28 21-48 46-48 15 0 27 7 34 18 7-11 19-18 34-18 25 0 46 20 46 48 0 52-70 98-80 98z" fill="#c2185b"/>
+</svg>

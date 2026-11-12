@@ -31,16 +31,18 @@ pnpm dev
 
 ## Scripts
 
-| Script            | What it does                                    |
-| ----------------- | ----------------------------------------------- |
-| `pnpm dev`        | Start the dev server                            |
-| `pnpm build`      | Type-check and build for production             |
-| `pnpm typecheck`  | Run the TypeScript compiler                     |
-| `pnpm lint`       | Lint with oxlint (warnings fail)                |
-| `pnpm format`     | Format with Prettier                            |
-| `pnpm test`       | Run unit and component tests once               |
-| `pnpm test:watch` | Run tests in watch mode                         |
-| `pnpm check`      | Everything CI runs, except the production build |
+| Script                     | What it does                                    |
+| -------------------------- | ----------------------------------------------- |
+| `pnpm dev`                 | Start the dev server                            |
+| `pnpm build`               | Type-check and build for production             |
+| `pnpm typecheck`           | Run the TypeScript compiler                     |
+| `pnpm lint`                | Lint with oxlint (warnings fail)                |
+| `pnpm format`              | Format with Prettier                            |
+| `pnpm test`                | Run unit and component tests once               |
+| `pnpm test:watch`          | Run tests in watch mode                         |
+| `pnpm check`               | Everything CI runs, except the production build |
+| `pnpm preview`             | Serve the production build (service worker on)  |
+| `pnpm generate-pwa-assets` | Regenerate the app icons from `public/icon.svg` |
 
 ## Project structure
 
@@ -59,6 +61,12 @@ src/
 └── test/             # Test setup and helpers
 docs/adr/             # Architecture Decision Records
 ```
+
+## Offline and install (PWA)
+
+The service worker only exists in production builds: test it with `pnpm build && pnpm preview`
+(Chrome DevTools → Application). On iPhone, open the deployed HTTPS site in Safari →
+Share → Add to Home Screen.
 
 ## Privacy
 
