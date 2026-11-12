@@ -62,6 +62,10 @@ src/
 docs/adr/             # Architecture Decision Records
 ```
 
+## Testing
+
+See [docs/testing-strategy.md](docs/testing-strategy.md).
+
 ## Offline and install (PWA)
 
 The service worker only exists in production builds: test it with `pnpm build && pnpm preview`

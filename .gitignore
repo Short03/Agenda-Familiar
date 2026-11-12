@@ -30,3 +30,9 @@ coverage
 
 # Private family data (never commit)
 *.local.ts
+
+# Cypress artifacts
+cypress/downloads
+cypress/screenshots
+cypress/videos
+*.tsbuildinfo
