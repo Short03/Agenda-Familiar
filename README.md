@@ -72,6 +72,11 @@ The service worker only exists in production builds: test it with `pnpm build &&
 (Chrome DevTools → Application). On iPhone, open the deployed HTTPS site in Safari →
 Share → Add to Home Screen.
 
+## Deploy
+
+Hosted on Vercel (ADR 0006), configured in `vercel.json`. Every push to `main` deploys
+production and every pull request gets a preview URL. GitHub Actions runs the checks.
+
 ## Privacy
 
 Family data (names, birthdays) is entered in the app and stored on the device only.
