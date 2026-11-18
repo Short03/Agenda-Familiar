@@ -27,7 +27,9 @@ the layer below cannot.
   audited by Cypress in a real browser.
 - **E2E isolation:** Cypress does not clear service workers, Cache Storage or IndexedDB,
   so `cypress/support/e2e.ts` wipes them through the Chrome DevTools Protocol before each
-  test. Only the PWA spec lets the service worker register.
+  test. Only the PWA spec lets the service worker register, and it runs in a separate
+  Cypress run (fresh browser): after other specs, the worker stopped answering
+  navigations, which made it flaky. Isolating it beats hiding flakiness with retries.
 
 ## What we do not test
 

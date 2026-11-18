@@ -1,10 +1,13 @@
 /**
  * The only spec with the real service worker. It proves the app opens with no network,
  * which unit tests cannot do (there is no service worker in jsdom or in `pnpm dev`).
+ *
+ * It runs in its own Cypress run (`pnpm e2e:run`). After the other specs, Chrome keeps
+ * state that Storage.clearDataForOrigin does not reset, and the worker stopped answering
+ * navigations. In a fresh browser it passes every time.
  */
 describe('Offline app (PWA)', () => {
-  // No frozen clock here: cy.clock also patches Date for Workbox in the page, which
-  // delays the install. Nothing in this spec depends on today's date.
+  // No frozen clock: nothing in this spec depends on today's date.
 
   it('serves a valid web manifest with the app icons', () => {
     cy.request('/manifest.webmanifest')
@@ -58,11 +61,21 @@ describe('Offline app (PWA)', () => {
       ['/tareas', 'Tareas'],
       ['/ajustes', 'Ajustes'],
     ] as const) {
-      // A real browser navigation (not cy.visit, which first asks the Cypress server and
-      // would hit the cut network): the service worker answers it from its cache.
-      cy.window().then((win) => win.location.assign(path))
-      cy.location('pathname').should('eq', path)
-      cy.findByRole('heading', { level: 1, name: heading }).should('exist')
+      // Open each page in an iframe: a real navigation that the service worker answers
+      // from its cache. Navigating the main page instead (cy.visit or location.assign)
+      // goes through Cypress's own page-load handling, which made this test flaky.
+      const frameId = `offline-${path.slice(1)}`
+      cy.document().then((doc) => {
+        const frame = doc.createElement('iframe')
+        frame.id = frameId
+        frame.title = heading
+        frame.src = path
+        doc.body.append(frame)
+      })
+      cy.get(`#${frameId}`, { timeout: 15_000 })
+        .its('0.contentDocument.body')
+        .find('h1', { timeout: 15_000 })
+        .should('have.text', heading)
     }
   })
 })

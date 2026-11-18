@@ -14,9 +14,9 @@ jobs:
     name: Lint, types, unit tests and build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -34,20 +34,51 @@ jobs:
     name: End-to-end (Cypress, Chrome)
     needs: check
     runs-on: ubuntu-latest
+    env:
+      # Node tries IPv6 and IPv4 in parallel and gives up on each after 250 ms by default.
+      # On GitHub runners that fails big downloads with "Socket closed before the
+      # connection was established". A longer attempt timeout fixes it.
+      NODE_OPTIONS: --network-family-autoselection-attempt-timeout=2000
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: pnpm
+
+      # The Cypress binary (~500 MB) is cached per lockfile, so most runs skip the download.
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - run: pnpm install --frozen-lockfile
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+
+      - name: Install Cypress binary (with retries)
+        run: |
+          for attempt in 1 2 3; do
+            pnpm exec cypress install && pnpm exec cypress verify && exit 0
+            echo "Attempt $attempt failed, retrying in 15 s"
+            sleep 15
+          done
+          exit 1
+
+      # Same as production: build, then serve the static files.
+      - run: pnpm build
+
       - uses: cypress-io/github-action@v6
         with:
-          # Same as production: build, then serve the static files.
-          build: pnpm build
+          install: false
+          # Two Cypress runs: the PWA spec needs a browser no other spec has touched.
+          command: pnpm e2e:run
           start: pnpm exec vite preview --port 4173 --strictPort
           wait-on: http://localhost:4173
           browser: chrome
+
       - name: Upload screenshots of failed tests
         if: failure()
         uses: actions/upload-artifact@v4
