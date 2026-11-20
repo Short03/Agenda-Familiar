@@ -34,11 +34,6 @@ jobs:
     name: End-to-end (Cypress, Chrome)
     needs: check
     runs-on: ubuntu-latest
-    env:
-      # Node tries IPv6 and IPv4 in parallel and gives up on each after 250 ms by default.
-      # On GitHub runners that fails big downloads with "Socket closed before the
-      # connection was established". A longer attempt timeout fixes it.
-      NODE_OPTIONS: --network-family-autoselection-attempt-timeout=2000
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -70,14 +65,19 @@ jobs:
       # Same as production: build, then serve the static files.
       - run: pnpm build
 
-      - uses: cypress-io/github-action@v6
-        with:
-          install: false
+      # Plain shell instead of cypress-io/github-action: its wait-on gave up after 1 s with
+      # "Socket closed before the connection was established" while the server was starting,
+      # instead of retrying. curl retries until the server answers.
+      - name: Run Cypress against the production build
+        run: |
+          pnpm exec vite preview --port 4173 --strictPort &
+          for second in $(seq 60); do
+            curl --silent --fail --output /dev/null http://localhost:4173 && break
+            sleep 1
+          done
+          curl --silent --fail --output /dev/null http://localhost:4173
           # Two Cypress runs: the PWA spec needs a browser no other spec has touched.
-          command: pnpm e2e:run
-          start: pnpm exec vite preview --port 4173 --strictPort
-          wait-on: http://localhost:4173
-          browser: chrome
+          pnpm e2e:run
 
       - name: Upload screenshots of failed tests
         if: failure()
